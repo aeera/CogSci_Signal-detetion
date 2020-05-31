@@ -10,6 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # set some global variables
+DEBUG = False
 params = dict()
 params['num_of_trials'] = 50 # a block always consists of 50 trials
 params['fps'] = 60.0         # assume same frames per second for everyone
@@ -75,9 +76,13 @@ def setup(intensity,task):
         error('Unknown task: should be yes-no or 2AFC')
     # this will create a warning that no monitor is specified
     # but we don't care because we only have pixel images
-    win = visual.Window([800,600], allowGUI=True, fullscr=True,
-                        units='pix', color=[0.5,0.5,0.5])
-    win.setMouseVisible(False)
+    if DEBUG:
+        win = visual.Window([800,600], allowGUI=True,
+                            units='pix', color=[0.5,0.5,0.5])
+    else:
+        win = visual.Window(fullscr=True,
+                            units='pix', color=[0.5,0.5,0.5])
+        win.setMouseVisible(False)
     message = visual.TextStim(win, pos=[0,100],text=text)
     message.draw()
     stim = visual.ImageStim(win, image=stimulus(0),
