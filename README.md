@@ -1,6 +1,6 @@
 # Signal Detection Tutorial
 
-Signal detection theory is one of the most successful theories in all of cognitive science and psychology. This is a tutorial notebook for learning the basics by running a little signal detection experiment on yourself and analyzing the data.
+Signal detection theory is one of the most successful theories in all of cognitive science and psychology. This is a tutorial notebook for learning the basics by running a little signal detection experiment on yourself and analyzing the data. It accompanies the course *Cognitive Science I: Perception* at TU Darmstadt and replaces the lab work during the 2020 corona pandemic.
 
 ## Installation
 
@@ -20,13 +20,13 @@ to install all the required packages. Then (still in the same directory) activat
 conda activate signal_detection
 ```
 
-and start jupyter notebook with the tutorial
+start jupyter notebook
 
 ```
-jupyter notebook signal_detection_tutorial.ipynb
+jupyter notebook
 ```
 
-Now you're ready to go.
+and click on the tutorial in the browser window that will open. Now you're ready to go.
 
 ## Additional Reading
 

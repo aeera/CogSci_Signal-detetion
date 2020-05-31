@@ -28,5 +28,5 @@ _region_.*
 # vi
 *.swp
 
-# include pdfs in literature folder
-!/literature/*.pdf
+# do not include the data that is generated in the tutorial
+data_*.csv
