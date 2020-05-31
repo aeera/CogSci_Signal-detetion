@@ -38,4 +38,18 @@ For this tutorial the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 
 
 An excellent paper to get an overview of why you should care about signal detection theory beyond the simple experiment in this tutorial is
 
-Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: [10.1111/1529-1006.001](https://doi.org/10.1111/1529-1006.001). 
+Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: [10.1111/1529-1006.001](https://doi.org/10.1111/1529-1006.001).
+
+# Working with jupyter notebooks and git
+Just in case you're working with git: To keep version control on git clean, it is better not to commit the output of the cells and the count how often they have been run and so forth.
+For a clean, well readable diff it helps to strip all this information before commiting.
+With the following configuration it will be done automatically, leaving your local copy intact.
+
+To your global `~/.gitconfig` you can add the following filter (you can edit it by typing `git config --edit --global`):
+
+```
+[filter "clearoutput"]
+        clean = "jupyter nbconvert --to notebook --ClearOutputPreprocessor.enabled=True --stdin --stdout"
+```
+
+In the project-level `.gitattributes` file this option turns on the filter: `*.ipynb filter=clearoutput`
