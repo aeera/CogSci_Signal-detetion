@@ -2,7 +2,7 @@
 
 Signal detection theory is one of the most successful theories in all of cognitive science and psychology. This is a tutorial notebook for learning the basics by running a little signal detection experiment on yourself and analyzing the data.
 
-# Installation
+## Installation
 
 You need python, psychopy and jupyter to run the tutorials. It's easiest if you install everything through `conda`. If you know what you're doing or you already have a working python and jupyter environment you might also be able to do it differently than described here. However, as psychopy requires python 3.6 and you don't want to mess with your existing python installation it's probably better to follow these instructions. If you don't already have anaconda installed, install anaconda from
 
@@ -28,7 +28,7 @@ jupyter notebook signal_detection_tutorial.ipynb
 
 Now you're ready to go.
 
-# Additional Reading
+## Additional Reading
 
 A good place to start is
 
@@ -40,7 +40,7 @@ An excellent paper to get an overview of why you should care about signal detect
 
 Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: [10.1111/1529-1006.001](https://doi.org/10.1111/1529-1006.001).
 
-# Working with jupyter notebooks and git
+## Working with jupyter notebooks and git
 Just in case you're working with git: To keep version control on git clean, it is better not to commit the output of the cells and the count how often they have been run and so forth.
 For a clean, well readable diff it helps to strip all this information before commiting.
 With the following configuration it will be done automatically, leaving your local copy intact.
