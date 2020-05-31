@@ -34,8 +34,8 @@ A good place to start is
 
 Wickens, T.D. (2002). *Elementary Signal Detection Theory*. Oxford University Press.  
 
-For this tutorial the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48). TU Darmstadt has an (online copy)[https://hds.hebis.de/ulbda/Record/HEB379323249] where you can read and copy the respective sections. Please don't borrow the whole e-book because then nobody else in class can read it while you borrow it.
+For this tutorial the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48). TU Darmstadt has an [online copy](https://hds.hebis.de/ulbda/Record/HEB379323249) where you can read and copy the respective sections. Please don't borrow the whole e-book because then nobody else in class can read it while you borrow it.
 
 An excellent paper to get an overview of why you should care about signal detection theory beyond the simple experiment in this tutorial is
 
-Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: (10.1111/1529-1006.001)[https://doi.org/10.1111/1529-1006.001]. 
+Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: [10.1111/1529-1006.001](https://doi.org/10.1111/1529-1006.001). 
