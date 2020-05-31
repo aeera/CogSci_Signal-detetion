@@ -1,0 +1,32 @@
+# IPython Notebook
+.ipynb_checkpoints
+
+# Python
+__pycache__
+
+#MAC FILE MANAGEMENT
+.DS_Store
+
+#latex
+*.sav
+*.bak
+*.aux
+*.pdf
+*.bbl
+*.blg
+*.log
+*.out
+*.spl
+*.gz
+*.ps
+*.dvi
+_region_.*
+
+# pandoc debug
+# latex/*.tex
+
+# vi
+*.swp
+
+# include pdfs in literature folder
+!/literature/*.pdf
