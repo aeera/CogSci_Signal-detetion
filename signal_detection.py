@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+pd.set_option('precision',2)
 
 from psychopy import core, visual, event, monitors
 from imageio import imread
@@ -63,6 +64,9 @@ def load_data(subject):
                 'trial':[],
                 'stimulus':[],
                 'response':[],
+                'hit':[],
+                'false_alarm':[],
+                'correct':[],
                 'RT':[]}
         data = pd.DataFrame(data)
     return data
@@ -191,9 +195,12 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
                  'block': block,
                  'intensity': intensity,
                  'p': p,
-                 'trial': i,
-                 'stimulus': s,
-                 'response': r,
+                 'trial': int(i),
+                 'stimulus': int(s),
+                 'response': int(r),
+                 'hit': int(s and r),
+                 'false_alarm': int(not(s) and r),
+                 'correct': int(s==r),
                  'RT': rt}
         data = data.append(ndata, ignore_index=True)
     # after a number of trials have been done save and quit
@@ -203,3 +210,26 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
     win.close()
     core.quit()
     return data
+
+def summarize(data, group = ['intensity','p'], mode='all'):
+    grouped = data.groupby(group)
+    # hit rate
+    N1 = grouped['stimulus'].sum()
+    H = grouped['hit'].sum() / N1
+    # false alarm rate
+    N0 = grouped.size()-grouped['stimulus'].sum()
+    FA = grouped['false_alarm'].sum() / N0
+    # percent correct
+    N = N0 + N1
+    PC = grouped['correct'].sum() / N
+    # aggregate
+    if mode == 'pc':
+        summary = pd.DataFrame([PC, N]).T
+        summary.columns=['PC','N']
+    elif mode == 'roc':
+        summary = pd.DataFrame([FA, H, N0, N1]).T
+        summary.columns=['FA','H','N0','N1']
+    elif mode == 'all':
+        summary = pd.DataFrame([FA, H, PC, N0, N1, N]).T
+        summary.columns=['FA','H','PC','N0','N1','N']
+    return summary
