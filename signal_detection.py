@@ -4,7 +4,8 @@ pd.set_option('precision',2)
 
 from psychopy import core, visual, event, monitors
 from imageio import imread
-from matplotlib.pyplot import imshow, cm, subplot, title
+from matplotlib.pyplot import *
+from scipy.optimize import minimize
 from os.path import isfile
 
 import warnings
@@ -27,8 +28,8 @@ params['gray'] = 127.0
 params['noise_level'] = 25.0
 A = imread('A.png')      # read image A from file
 A = A[::-4,::4]          # downsample to 25x25 pixels
-A = 1-np.mean(A,2)/255.0 # and make grayscale white on black
-params['signal'] = A
+A = 1-np.mean(A,2)       # and make grayscale white on black
+params['signal'] = A.copy()
 params['background'] = np.ones((25,25)) * params['gray']
 
 # generate a stimulus from the signal and random noise
@@ -84,7 +85,7 @@ def setup(intensity,task):
         win = visual.Window([800,600], allowGUI=True,
                             units='pix', color=[0.5,0.5,0.5])
     else:
-        win = visual.Window(fullscr=True,
+        win = visual.Window(fullscr=True, allowGUI=True,
                             units='pix', color=[0.5,0.5,0.5])
         win.setMouseVisible(False)
     message = visual.TextStim(win, pos=[0,100],text=text)
@@ -233,3 +234,46 @@ def summarize(data, group = ['intensity','p'], mode='all'):
         summary = pd.DataFrame([FA, H, PC, N0, N1, N]).T
         summary.columns=['FA','H','PC','N0','N1','N']
     return summary
+
+def weibull(x,pvec,q=0.5):
+    # Weibull since intensity cannot be smaller than zero
+    # parametrization as in Kuss, Jäkel, & Wichmann (2005)
+    m = pvec[0]
+    s = pvec[1]
+    c = 2*s*m/np.log(2)
+    k = np.log(np.log(2))
+    y = 1-np.exp(-np.exp(c * (np.log(x)-np.log(m)) + k))
+    return y * (1-q) + q
+
+def inv_weibull(y,pvec,q=0.5):
+    assert y >= q
+    m = pvec[0]
+    s = pvec[1]
+    c = 2*s*m/np.log(2)
+    k = np.log(np.log(2))
+    x = np.exp((np.log(np.log(((y-q)/(1-q)-1)*(-1))*(-1))-k)/c+np.log(m))
+    return x
+
+def psychometric_function(data):
+    s = summarize(data,'intensity','pc')
+    x = s.index.values
+    y = s['PC'].values
+    n = s['N'].values
+    # fit a weibull with least squares
+    # we don't want the hassle with lapses and lsq is more robust than ml
+    def err(pvec):
+        return np.sum(n * (weibull(x,pvec)-y)**2)
+    res = minimize(err, [np.mean(s.index), 0.5])
+    xx = np.linspace(0,np.max(x)*1.1,1000)
+    pvec = res['x']
+    pc = [0.55, 0.65, 0.75, 0.85, 0.95]
+    theta = [inv_weibull(p,pvec) for p in pc]
+    for p,t in zip(pc,theta):
+        plot([0,t,t],[p,weibull(t,pvec),0],color='grey',linestyle=':')
+        print('%d%% threshold: %.0f'%(p*100,t))
+    plot(xx,weibull(xx,pvec))
+    scatter(x,y,marker='o',s=n)
+    xlabel('intensity')
+    ylabel('PC')
+    grid()
+    return theta
