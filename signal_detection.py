@@ -6,6 +6,7 @@ from psychopy import core, visual, event, monitors
 from imageio import imread
 from matplotlib.pyplot import *
 from scipy.optimize import minimize
+from scipy.stats import norm
 from os.path import isfile
 
 import warnings
@@ -74,9 +75,9 @@ def load_data(subject):
 
 def setup(intensity,task):
     if task == 'yes-no':
-        text = 'Press y if you see an A and n otherwise. Any key to start (ESC to quit).'
+        text = 'Press y if you see an A and n otherwise.\nAny key to start (ESC to quit).'
     elif task == '2AFC':
-        text = 'Press left if you see an A on the left and right if you see it on the right. Any key to start (ESC to quit).'
+        text = 'Press left if you see an A on the left and right if you see it on the right.\nAny key to start (ESC to quit).'
     else:
         error('Unknown task: should be yes-no or 2AFC')
     # this will create a warning that no monitor is specified
@@ -85,7 +86,7 @@ def setup(intensity,task):
         win = visual.Window([800,600], allowGUI=True,
                             units='pix', color=[0.5,0.5,0.5])
     else:
-        win = visual.Window(fullscr=True, allowGUI=True,
+        win = visual.Window(fullscr=True,
                             units='pix', color=[0.5,0.5,0.5])
         win.setMouseVisible(False)
     message = visual.TextStim(win, pos=[0,100],text=text)
@@ -100,7 +101,7 @@ def setup(intensity,task):
     event.waitKeys()
     return win
 
-def run_block(subject,intensity,p=0.5,task='yes-no'):
+def run_block(subject,intensity,p=0.5,num_of_blocks=1,task='yes-no'):
     data = load_data(subject)
     if len(data)>0:
         block = data['block'].max()+1
@@ -111,7 +112,7 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
     fix = visual.ShapeStim(win, vertices=v, lineWidth=2, closeShape=False,
                            lineColor="white")
     pos = visual.ShapeStim(win, vertices=v, lineWidth=2, closeShape=False,
-                           lineColor="green")
+                           lineColor="lawngreen")
     neg = visual.ShapeStim(win, vertices=v, lineWidth=2, closeShape=False,
                            lineColor="red")
     # we will do the timing based on the internal clock
@@ -123,7 +124,8 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
     # the flip. Hopefully in this way we'll stay in sync.
     # The blanks are purposely flexible in timing. Important
     # is only the stimulus presentation.
-    for i in range(params['num_of_trials']):
+    num_of_trials = params['num_of_trials'] * num_of_blocks
+    for i in range(num_of_trials):
         core.wait(params['blank_time']-params['slack'])
         # prepare trial
         s = int(np.random.rand() < p)
@@ -196,7 +198,7 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
                  'block': block,
                  'intensity': intensity,
                  'p': p,
-                 'trial': int(i),
+                 'trial': int(i+1),
                  'stimulus': int(s),
                  'response': int(r),
                  'hit': int(s and r),
@@ -204,16 +206,39 @@ def run_block(subject,intensity,p=0.5,task='yes-no'):
                  'correct': int(s==r),
                  'RT': rt}
         data = data.append(ndata, ignore_index=True)
-    # after a number of trials have been done save and quit
-    if r>-1: # don't save on escape
-        data.to_csv(params['filename'],header=True,index=False)
+        # after a number of trials have been done save
+        if ((i+1) % params['num_of_trials']) == 0:
+            data.to_csv(params['filename'],header=True,index=False)
+            pc = data[data['block']==block]['correct'].mean()
+            text = '%d of %d trials done. %.2f%% correct in last block.\nAny key to continue.'%(i+1,num_of_trials,pc*100)
+            block = block + 1
+            message = visual.TextStim(win, pos=[0,100],text=text)
+            message.draw()
+            win.flip()
+            event.waitKeys()
+    # and quit
     win.setMouseVisible(True)
     win.close()
-    core.quit()
+    try:
+        core.quit()
+    except:
+        print('Done, psychopy core quit.')
     return data
 
-def summarize(data, group = ['intensity','p'], mode='all'):
-    grouped = data.groupby(group)
+def summarize(data, p=0.5, intensity=None, mode='pc', group=None):
+    if p is not None and intensity is not None:
+        df = data[data['p']==p and data['intensity']==intensity]
+        if group is None:
+            group = 'block'
+    elif p is not None:
+        df = data[data['p']==p]
+        if group is None:
+            group = ['p','intensity']
+    else:
+        df = data[data['intensity']==intensity]
+        if group is None:
+            group = ['intensity','p']
+    grouped = df.groupby(group)
     # hit rate
     N1 = grouped['stimulus'].sum()
     H = grouped['hit'].sum() / N1
@@ -226,13 +251,13 @@ def summarize(data, group = ['intensity','p'], mode='all'):
     # aggregate
     if mode == 'pc':
         summary = pd.DataFrame([PC, N]).T
-        summary.columns=['PC','N']
+        summary.columns=['pc','N']
     elif mode == 'roc':
         summary = pd.DataFrame([FA, H, N0, N1]).T
-        summary.columns=['FA','H','N0','N1']
+        summary.columns=['f','h','N0','N1']
     elif mode == 'all':
         summary = pd.DataFrame([FA, H, PC, N0, N1, N]).T
-        summary.columns=['FA','H','PC','N0','N1','N']
+        summary.columns=['f','h','pc','N0','N1','N']
     return summary
 
 def weibull(x,pvec,q=0.5):
@@ -255,9 +280,9 @@ def inv_weibull(y,pvec,q=0.5):
     return x
 
 def psychometric_function(data):
-    s = summarize(data,'intensity','pc')
+    s = summarize(data,group='intensity')
     x = s.index.values
-    y = s['PC'].values
+    y = s['pc'].values
     n = s['N'].values
     # fit a weibull with least squares
     # we don't want the hassle with lapses and lsq is more robust than ml
@@ -267,13 +292,32 @@ def psychometric_function(data):
     xx = np.linspace(0,np.max(x)*1.1,1000)
     pvec = res['x']
     pc = [0.55, 0.65, 0.75, 0.85, 0.95]
-    theta = [inv_weibull(p,pvec) for p in pc]
-    for p,t in zip(pc,theta):
+    thresholds = [inv_weibull(p,pvec) for p in pc]
+    for p,t in zip(pc,thresholds):
         plot([0,t,t],[p,weibull(t,pvec),0],color='grey',linestyle=':')
         print('%d%% threshold: %.0f'%(p*100,t))
     plot(xx,weibull(xx,pvec))
-    scatter(x,y,marker='o',s=n)
+    scatter(x,y,marker='o',s=n/2.0)
     xlabel('intensity')
-    ylabel('PC')
+    ylabel('proportion correct')
     grid()
-    return theta
+    return thresholds
+
+def plot_roc_confidence(df,color='tab:blue',ses=2):
+    for f,h,n0,n1 in zip(df['f'], df['h'], df['N0'], df['N1']):
+        f_se = np.sqrt(f*(1-f)/n0)
+        h_se = np.sqrt(h*(1-h)/n1)
+        plot([f-ses*f_se,f+ses*f_se],[h,h],color=color)
+        plot([f,f],[h-ses*h_se,h+ses*h_se],color=color)
+        
+def plot_roc(df, conf=True, labels=True):
+    color = 'tab:blue'
+    plot([0,1],[0,1],'k')
+    scatter(df['f'], df['h'], s=25, color=color)
+    if conf: #let's you see confidence intervals (+-2 standard errors)
+        plot_roc_confidence(df,color=color) # but they are huge unless you collect much more data
+    if labels:
+        for f,h,p in zip(df['f'], df['h'], df.index):
+            text(f+0.01, h+0.02, str(p))
+    xlabel('False Alarm Rate'), ylabel('Hit Rate'), title('ROC')
+    axis('square'), xlim([0,1]), ylim([0,1])
