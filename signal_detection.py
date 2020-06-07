@@ -1,16 +1,17 @@
-import numpy as np
+from numpy import *
 import pandas as pd
 pd.set_option('precision',2)
 
-from psychopy import core, visual, event, monitors
+from os.path import isfile
 from imageio import imread
 from matplotlib.pyplot import *
 from scipy.optimize import minimize
 from scipy.stats import norm
-from os.path import isfile
 
 import warnings
 warnings.filterwarnings('ignore')
+from psychopy import logging
+logging.console.setLevel(logging.CRITICAL)
 
 # set some global variables
 DEBUG = False
@@ -29,18 +30,17 @@ params['gray'] = 127.0
 params['noise_level'] = 25.0
 A = imread('A.png')      # read image A from file
 A = A[::-4,::4]          # downsample to 25x25 pixels
-A = 1-np.mean(A,2)       # and make grayscale white on black
+A = 1-mean(A,2)          # and make grayscale white on black
 params['signal'] = A.copy()
-params['background'] = np.ones((25,25)) * params['gray']
+params['background'] = ones((25,25)) * params['gray']
 
 # generate a stimulus from the signal and random noise
 def stimulus(intensity):
-    noise = np.random.randn(25,25) * params['noise_level']
+    noise = random.randn(25,25) * params['noise_level']
     signal = params['signal'] * intensity
     stim = params['background'] + signal + noise
     stim[stim>255]=255
     stim[stim<0]=0
-    stim = np.round(stim)
     return stim/255.0
 
 def imshow_stimuli(intensity):
@@ -74,6 +74,7 @@ def load_data(subject):
     return data
 
 def setup(intensity,task):
+    from psychopy import core, visual, event, monitors
     if task == 'yes-no':
         text = 'Press y if you see an A and n otherwise.\nAny key to start (ESC to quit).'
     elif task == '2AFC':
@@ -102,6 +103,7 @@ def setup(intensity,task):
     return win
 
 def run_block(subject,intensity,p=0.5,num_of_blocks=1,task='yes-no'):
+    from psychopy import core, visual, event, monitors
     data = load_data(subject)
     if len(data)>0:
         block = data['block'].max()+1
@@ -128,7 +130,7 @@ def run_block(subject,intensity,p=0.5,num_of_blocks=1,task='yes-no'):
     for i in range(num_of_trials):
         core.wait(params['blank_time']-params['slack'])
         # prepare trial
-        s = int(np.random.rand() < p)
+        s = int(random.rand() < p)
         if task == 'yes-no':
             # 0 is a noise trial
             # 1 is a signal trial
@@ -222,7 +224,10 @@ def run_block(subject,intensity,p=0.5,num_of_blocks=1,task='yes-no'):
     try:
         core.quit()
     except:
-        print('Done, psychopy core quit.')
+        if r==-1:
+            print('Aborted, psychopy core quit.')
+        else:
+            print('Done, psychopy core quit.')
     return data
 
 def summarize(data, p=0.5, intensity=None, mode='pc', group=None):
@@ -261,22 +266,22 @@ def summarize(data, p=0.5, intensity=None, mode='pc', group=None):
     return summary
 
 def weibull(x,pvec,q=0.5):
-    # Weibull since intensity cannot be smaller than zero
+    # use Weibull since intensity cannot be smaller than zero
     # parametrization as in Kuss, Jäkel, & Wichmann (2005)
     m = pvec[0]
     s = pvec[1]
-    c = 2*s*m/np.log(2)
-    k = np.log(np.log(2))
-    y = 1-np.exp(-np.exp(c * (np.log(x)-np.log(m)) + k))
+    c = 2*s*m/log(2)
+    k = log(log(2))
+    y = 1-exp(-exp(c * (log(x)-log(m)) + k))
     return y * (1-q) + q
 
 def inv_weibull(y,pvec,q=0.5):
     assert y >= q
     m = pvec[0]
     s = pvec[1]
-    c = 2*s*m/np.log(2)
-    k = np.log(np.log(2))
-    x = np.exp((np.log(np.log(((y-q)/(1-q)-1)*(-1))*(-1))-k)/c+np.log(m))
+    c = 2*s*m/log(2)
+    k = log(log(2))
+    x = exp((log(log(((y-q)/(1-q)-1)*(-1))*(-1))-k)/c+log(m))
     return x
 
 def psychometric_function(data):
@@ -284,12 +289,11 @@ def psychometric_function(data):
     x = s.index.values
     y = s['pc'].values
     n = s['N'].values
-    # fit a weibull with least squares
-    # we don't want the hassle with lapses and lsq is more robust than ml
+    # fit a weibull using least squares
     def err(pvec):
-        return np.sum(n * (weibull(x,pvec)-y)**2)
-    res = minimize(err, [np.mean(s.index), 0.5])
-    xx = np.linspace(0,np.max(x)*1.1,1000)
+        return sum(n * (weibull(x,pvec)-y)**2)
+    res = minimize(err, [mean(s.index), 0.5])
+    xx = linspace(0,max(x)*1.1,1000)
     pvec = res['x']
     pc = [0.55, 0.65, 0.75, 0.85, 0.95]
     thresholds = [inv_weibull(p,pvec) for p in pc]
@@ -305,19 +309,77 @@ def psychometric_function(data):
 
 def plot_roc_confidence(df,color='tab:blue',ses=2):
     for f,h,n0,n1 in zip(df['f'], df['h'], df['N0'], df['N1']):
-        f_se = np.sqrt(f*(1-f)/n0)
-        h_se = np.sqrt(h*(1-h)/n1)
-        plot([f-ses*f_se,f+ses*f_se],[h,h],color=color)
-        plot([f,f],[h-ses*h_se,h+ses*h_se],color=color)
+        f_se = sqrt(f*(1-f)/n0)
+        h_se = sqrt(h*(1-h)/n1)
+        plot([f-ses*f_se,f+ses*f_se],[h,h],color=color,alpha=0.3)
+        plot([f,f],[h-ses*h_se,h+ses*h_se],color=color,alpha=0.3)
         
-def plot_roc(df, conf=True, labels=True):
-    color = 'tab:blue'
+def plot_roc(df, conf=True, labels=True, color='tab:blue'):
+    # plot the diagonal line
     plot([0,1],[0,1],'k')
+    # plot the data
     scatter(df['f'], df['h'], s=25, color=color)
-    if conf: #let's you see confidence intervals (+-2 standard errors)
-        plot_roc_confidence(df,color=color) # but they are huge unless you collect much more data
+    # plot confidence intervals (+-2 standard errors)
+    if conf:
+        # but they will be huge unless you collect much more data
+        plot_roc_confidence(df,color=color)
+    # write the condition-label next to the data
     if labels:
         for f,h,p in zip(df['f'], df['h'], df.index):
             text(f+0.01, h+0.02, str(p))
+    # label the axes
     xlabel('False Alarm Rate'), ylabel('Hit Rate'), title('ROC')
+    # and make the plot square and pretty
     axis('square'), xlim([0,1]), ylim([0,1])
+    grid('on')
+    tight_layout()
+
+# the standard normal density
+def phi(x):
+    return norm.pdf(x,0,1)
+
+# the standard normal cumulative distribution function
+def Phi(x):
+    return norm.cdf(x,0,1)
+
+# the inverse of Phi
+def Z(x):
+    return norm.ppf(x,0,1)
+    
+def plot_sdt(d_prime,lam,p=None):
+    # a nice plot to play around with
+    figure(figsize=(9,1))
+    ax = axes()
+    N = 100
+    x1 = linspace(-4,lam,N)
+    x2 = linspace(lam,9,N)
+    x = hstack([x1,x2])
+    plot(x,phi(x),color='tab:red')
+    fill_between(x2,phi(x2),color='tab:red',alpha=0.5,
+                 label='$P_F$=%.2f'%(1-Phi(lam)))
+    plot(x,phi(x-d_prime),color='tab:green')
+    fill_between(x2,phi(x2-d_prime),facecolor='None',
+                 hatch='//',edgecolor='tab:green',
+                 label='$P_H$=%.2f'%(1-Phi(lam-d_prime)))
+    legend(frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.get_yaxis().set_ticks([])
+    axvline(lam,color='k')
+    axvline(0,color='tab:red')
+    axvline(d_prime,color='tab:green')
+    t = '$d^{\prime}=%.2f$, $\lambda=%.2f$'%(d_prime,lam)
+    if p is not None:
+        t = 'p='+str(p)+': '+t
+    title(t)
+    
+def interactive_sdt():
+    from ipywidgets import interact
+    import ipywidgets as widgets
+    @interact(d_prime=widgets.FloatSlider(min=-3, max=4, step=0.1, value=2), 
+          lam=widgets.FloatSlider(min=-3, max=7, step=0.1, value=1))
+    def update(d_prime, lam):
+        plot_sdt(d_prime, lam)
+        
+    
