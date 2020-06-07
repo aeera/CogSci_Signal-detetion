@@ -1,6 +1,14 @@
-# Signal Detection Tutorial
+# Signal Detection Theory Homework
 
-Signal detection theory is one of the most successful theories in all of cognitive science and psychology. This is a tutorial notebook for learning the basics by running a little signal detection experiment on yourself and analyzing the data. It accompanies the course *Cognitive Science I: Perception* at TU Darmstadt and replaces the lab work during the 2020 corona pandemic.
+Homework for *Cognitive Science I: Perception* at [TU Darmstadt](https://www.tu-darmstadt.de/cogsci/studying_cogsci/index.en.jsp). This homework replaces the lab work during the 2020 corona pandemic. 
+
+Signal detection theory is one of the most successful theories in all of cognitive science and psychology. We assume you've already covered the basics of signal detection theory elsewhere. In the course we use the following text:
+
+Wickens, T.D. (2002). *Elementary Signal Detection Theory*. Oxford University Press.  
+
+For this homework the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48).
+
+Here, you will consolidate the basics of signal detection theory by running a little signal detection experiment on yourself and analyzing the data. To collect data follow the instructions in `signal_detection_data_collection.ipynb`. After you've collected your data start on the homework excercises in `signal_detection_homework.ipynb`.
 
 ## Installation
 
@@ -26,21 +34,11 @@ start jupyter notebook
 jupyter notebook
 ```
 
-and click on the tutorial in the browser window that will open. Now you're ready to go.
+and click on `signal_detection_data_collection.ipynb` in the browser window that will open. Now you're ready to go.
 
-## Additional Reading
-
-A good place to start is
-
-Wickens, T.D. (2002). *Elementary Signal Detection Theory*. Oxford University Press.  
-
-For this tutorial the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48). TU Darmstadt has an [online copy](https://hds.hebis.de/ulbda/Record/HEB379323249) where you can read and copy the respective sections. Please don't borrow the whole e-book because then nobody else in class can read it while you borrow it.
-
-An excellent paper to get an overview of why you should care about signal detection theory beyond the simple experiment in this tutorial is
-
-Swets, J.A., Dawes, R.M., & Monahan, J. (2000). Psychological Science Can Improve Diagnostic Decisions. *Psychological Science in the Public Interest*, 1(1):1-26, DOI: [10.1111/1529-1006.001](https://doi.org/10.1111/1529-1006.001).
 
 ## Working with jupyter notebooks and git
+
 Just in case you're working with git: To keep version control on git clean, it is better not to commit the output of the cells and the count how often they have been run and so forth.
 For a clean, well readable diff it helps to strip all this information before commiting.
 With the following configuration it will be done automatically, leaving your local copy intact.
