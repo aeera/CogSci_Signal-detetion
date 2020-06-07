@@ -17,7 +17,7 @@ https://www.anaconda.com/products/individual
 Next download the source code from this page (there's a download button in the top right corner next to the `clone` button) and put it into a directory called `signal_detection`. Or just clone the repository if you are familiar with `git`. In the new directory run
 
 ```
-conda env create -n signal_detection -f signal_detection_env.yml
+conda env create -n signal_detection -f ENVIRONMENT.yml
 ```
 
 to install all the required packages. Then (still in the same directory) activate the conda environment
