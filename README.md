@@ -6,9 +6,7 @@ Signal detection theory is one of the most successful theories in all of cogniti
 
 Wickens, T.D. (2002). *Elementary Signal Detection Theory*. Oxford University Press.  
 
-For this homework the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48).
-
-Here, you will consolidate the basics of signal detection theory by running a little signal detection experiment on yourself and analyzing the data. To collect data follow the instructions in `signal_detection_data_collection.ipynb`. After you've collected your data start on the homework excercises in `signal_detection_homework.ipynb`.
+For this homework the most relevant sections are 1.1-1.3 (p. 3-15), 2.1-2.3 (p. 17-26) and sections 3.1 (p. 39-42) and 3.3 (45-48). Here, you will consolidate the basics of signal detection theory by running a little signal detection experiment on yourself and analyzing the data. To collect data follow the instructions in `signal_detection_data_collection.ipynb`. After you've collected your data start on the actual homework excercises in `signal_detection_homework.ipynb`.
 
 ## Installation
 
