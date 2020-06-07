@@ -37,9 +37,7 @@ and click on `signal_detection_data_collection.ipynb` in the browser window that
 
 ## Working with jupyter notebooks and git
 
-Just in case you're working with git: To keep version control on git clean, it is better not to commit the output of the cells and the count how often they have been run and so forth.
-For a clean, well readable diff it helps to strip all this information before commiting.
-With the following configuration it will be done automatically, leaving your local copy intact.
+Just in case you're working with git and you want to fork your own repository based on this one or in case we invite you to push to this one: To keep version control on git clean, it is better not to commit the output of the cells and the count how often they have been run and so forth. For a clean, well readable diff it helps to strip all this information before commiting. With the following configuration it will be done automatically, leaving your local copy intact.
 
 To your global `~/.gitconfig` you can add the following filter (you can edit it by typing `git config --edit --global`):
 
